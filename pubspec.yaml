@@ -1,0 +1,11 @@
+name: walkie_token_server
+description: "Dart Frog Token Server for Agora (RTC + RTM) - Vercel Adapter - FULL"
+version: 1.0.0
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  dart_frog: ^1.1.0
+  shelf: ^1.4.1
+  shelf_router: ^1.1.4
+  shelf_cors: ^0.3.0
