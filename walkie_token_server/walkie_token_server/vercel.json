@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "functions": {
+    "api/index.dart": {
+      "runtime": "vercel-dart@0.6.2"
+    }
+  },
+  "routes": [
+    { "src": "/token/rtc", "dest": "/api/index.dart" },
+    { "src": "/token/rtm", "dest": "/api/index.dart" },
+    { "src": "/token/all", "dest": "/api/index.dart" }
+  ]
+}
