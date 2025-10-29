@@ -1,4 +1,5 @@
-import { RtmTokenBuilder, RtmRole } from 'agora-access-token';
+import pkg from 'agora-access-token';
+const { RtmTokenBuilder, RtmRole } = pkg;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -24,6 +25,10 @@ export default async function handler(req, res) {
     Math.floor(Date.now() / 1000) + expireSeconds
   );
 
-  return res.status(200).json({ token, mode: 'RTM', expireTs: Math.floor(Date.now() / 1000) + expireSeconds });
+  return res.status(200).json({
+    token,
+    mode: 'RTM',
+    expireTs: Math.floor(Date.now() / 1000) + expireSeconds
+  });
 }
 
