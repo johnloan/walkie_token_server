@@ -1,4 +1,5 @@
-import { RtcTokenBuilder, RtcRole, RtmTokenBuilder, RtmRole } from 'agora-access-token';
+import pkg from 'agora-access-token';
+const { RtcTokenBuilder, RtcRole, RtmTokenBuilder, RtmRole } = pkg;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,25 +18,26 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing "channel" or "uid"' });
 
   const expireSeconds = 3600;
+  const now = Math.floor(Date.now() / 1000);
   const rtcToken = RtcTokenBuilder.buildTokenWithUid(
     appId,
     appCertificate,
     channel,
     uid,
     RtcRole.PUBLISHER,
-    Math.floor(Date.now() / 1000) + expireSeconds
+    now + expireSeconds
   );
   const rtmToken = RtmTokenBuilder.buildToken(
     appId,
     appCertificate,
     uid.toString(),
     RtmRole.Rtm_User,
-    Math.floor(Date.now() / 1000) + expireSeconds
+    now + expireSeconds
   );
 
   return res.status(200).json({
     rtc: rtcToken,
     rtm: rtmToken,
-    expireTs: Math.floor(Date.now() / 1000) + expireSeconds
+    expireTs: now + expireSeconds
   });
 }
