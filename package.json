@@ -1,0 +1,9 @@
+{
+  "name": "walkie-token-server",
+  "version": "1.0.0",
+  "main": "api/rtc.js",
+  "type": "module",
+  "dependencies": {
+    "agora-access-token": "^2.0.4"
+  }
+}
