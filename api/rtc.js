@@ -1,4 +1,5 @@
-import { RtcTokenBuilder, RtcRole } from 'agora-access-token';
+import pkg from 'agora-access-token';
+const { RtcTokenBuilder, RtcRole } = pkg;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,7 +16,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Missing Agora credentials' });
   if (!channel) return res.status(400).json({ error: 'Missing "channel"' });
 
-  const expireSeconds = 3600; // 1h
+  const expireSeconds = 3600; // 1 ora
   const token = RtcTokenBuilder.buildTokenWithUid(
     appId,
     appCertificate,
@@ -25,6 +26,11 @@ export default async function handler(req, res) {
     Math.floor(Date.now() / 1000) + expireSeconds
   );
 
-  return res.status(200).json({ token, mode: 'RTC', expireTs: Math.floor(Date.now() / 1000) + expireSeconds });
+  return res.status(200).json({
+    token,
+    mode: 'RTC',
+    expireTs: Math.floor(Date.now() / 1000) + expireSeconds
+  });
 }
+
 
