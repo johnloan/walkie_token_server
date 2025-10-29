@@ -1,25 +1,29 @@
+import { RtmTokenBuilder, RtmRole } from 'agora-access-token';
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(204).end();
-
   if (req.method !== 'POST') return res.status(405).end();
 
-  const tempToken = process.env.TEMP_TOKEN || '';
-  try {
-    const { uid } = req.body || {};
-    if (uid === undefined) return res.status(400).json({ error: 'Missing "uid"' });
+  const appId = process.env.AGORA_APP_ID;
+  const appCertificate = process.env.AGORA_APP_CERT;
+  const { uid } = req.body || {};
 
-    if (!tempToken) {
-      return res.status(501).json({
-        error: 'TEMP_TOKEN not set',
-        hint: 'Add TEMP_TOKEN env var in Vercel Project Settings.',
-      });
-    }
+  if (!appId || !appCertificate)
+    return res.status(500).json({ error: 'Missing Agora credentials' });
+  if (uid === undefined) return res.status(400).json({ error: 'Missing "uid"' });
 
-    return res.status(200).json({ token: tempToken, mode: 'TEMP_TOKEN' });
-  } catch {
-    return res.status(400).json({ error: 'Invalid JSON body' });
-  }
+  const expireSeconds = 3600;
+  const token = RtmTokenBuilder.buildToken(
+    appId,
+    appCertificate,
+    uid.toString(),
+    RtmRole.Rtm_User,
+    Math.floor(Date.now() / 1000) + expireSeconds
+  );
+
+  return res.status(200).json({ token, mode: 'RTM', expireTs: Math.floor(Date.now() / 1000) + expireSeconds });
 }
+
