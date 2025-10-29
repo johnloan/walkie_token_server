@@ -1,27 +1,41 @@
+import { RtcTokenBuilder, RtcRole, RtmTokenBuilder, RtmRole } from 'agora-access-token';
+
 export default async function handler(req, res) {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(204).end();
-
   if (req.method !== 'POST') return res.status(405).end();
 
-  const tempToken = process.env.TEMP_TOKEN || '';
-  try {
-    const { channel, uid } = req.body || {};
-    if (!channel) return res.status(400).json({ error: 'Missing "channel"' });
-    if (uid === undefined) return res.status(400).json({ error: 'Missing "uid"' });
+  const appId = process.env.AGORA_APP_ID;
+  const appCertificate = process.env.AGORA_APP_CERT;
+  const { channel, uid } = req.body || {};
 
-    if (!tempToken) {
-      return res.status(501).json({
-        error: 'TEMP_TOKEN not set',
-        hint: 'Add TEMP_TOKEN env var in Vercel Project Settings.',
-      });
-    }
+  if (!appId || !appCertificate)
+    return res.status(500).json({ error: 'Missing Agora credentials' });
+  if (!channel || uid === undefined)
+    return res.status(400).json({ error: 'Missing "channel" or "uid"' });
 
-    return res.status(200).json({ token: tempToken, mode: 'TEMP_TOKEN' });
-  } catch {
-    return res.status(400).json({ error: 'Invalid JSON body' });
-  }
+  const expireSeconds = 3600;
+  const rtcToken = RtcTokenBuilder.buildTokenWithUid(
+    appId,
+    appCertificate,
+    channel,
+    uid,
+    RtcRole.PUBLISHER,
+    Math.floor(Date.now() / 1000) + expireSeconds
+  );
+  const rtmToken = RtmTokenBuilder.buildToken(
+    appId,
+    appCertificate,
+    uid.toString(),
+    RtmRole.Rtm_User,
+    Math.floor(Date.now() / 1000) + expireSeconds
+  );
+
+  return res.status(200).json({
+    rtc: rtcToken,
+    rtm: rtmToken,
+    expireTs: Math.floor(Date.now() / 1000) + expireSeconds
+  });
 }
